@@ -1,5 +1,5 @@
-git_release_tag = "latest"
-git_commit_hash = "latest"
+git_release_tag = 'latest'
+git_commit_hash = 'latest'
 git_commit_date = None
 
 import platform
