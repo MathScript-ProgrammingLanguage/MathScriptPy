@@ -1,0 +1,4 @@
+# For clearing on all OS
+colorama
+# Building
+cx_Freeze
