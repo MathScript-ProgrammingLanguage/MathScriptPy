@@ -9,7 +9,7 @@ with open('shell.py', 'r+') as f:
 
     try:
         git_release_tag = subprocess.check_output(['git', 'describe', '--tags']).decode('utf-8').strip()
-        git_commit_hash = subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode('utf-8').strip()
+        git_commit_hash = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('utf-8').strip()
         git_commit_date = subprocess.check_output(['git', 'show', '-s', '--format=%ci', 'HEAD']).decode('utf-8').strip()
     except subprocess.CalledProcessError:
         git_release_tag = "latest"
