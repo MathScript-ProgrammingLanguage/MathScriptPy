@@ -18,11 +18,13 @@ with open('shell.py', 'r+') as f:
         git_commit_hash = "latest"
     
     try:
-        git_commit_date = subprocess.check_output(['git', 'show', '-s', '--format=%cd', '--date=format:"%b %e %Y, %H:%M:%S"', 'HEAD']).decode('utf-8').strip()
+        git_commit_date = subprocess.check_output(['git', 'show', '-s', '--format=%cd', '--date=format:"%b %e %Y, %H:%M:%S"', 'HEAD']).decode('utf-8').strip().removeprefix('"').removesuffix('"')
     except subprocess.CalledProcessError as e:
         git_commit_date = None
 
-    content = content.replace('git_release_tag = "latest"\ngit_commit_hash = "latest"\ngit_commit_date = None', f'git_release_tag = {repr(git_release_tag)}\ngit_commit_hash = {repr(git_commit_hash)}\ngit_commit_date = {repr(git_commit_date)}')
+    print(f'git_release_tag = {repr(git_release_tag)}\ngit_commit_hash = {repr(git_commit_hash)}\ngit_commit_date = {repr(git_commit_date)}')
+
+    content = content.replace("git_release_tag = 'latest'\ngit_commit_hash = 'latest'\ngit_commit_date = None", f'git_release_tag = {repr(git_release_tag)}\ngit_commit_hash = {repr(git_commit_hash)}\ngit_commit_date = {repr(git_commit_date)}')
 
     f.seek(0)
     f.write(content)
