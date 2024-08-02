@@ -5,7 +5,7 @@ import subprocess
 original_content = ""
 
 with open('shell.py', 'r+') as f:
-    original_content = content = f.read()
+    content = original_content = f.read()
 
     try:
         git_release_tag = subprocess.check_output(['git', 'describe', '--tags']).decode('utf-8').strip()
