@@ -22,8 +22,6 @@ with open('shell.py', 'r+') as f:
     except subprocess.CalledProcessError as e:
         git_commit_date = None
 
-    print(f'git_release_tag = {repr(git_release_tag)}\ngit_commit_hash = {repr(git_commit_hash)}\ngit_commit_date = {repr(git_commit_date)}')
-
     content = content.replace("git_release_tag = 'latest'\ngit_commit_hash = 'latest'\ngit_commit_date = None", f'git_release_tag = {repr(git_release_tag)}\ngit_commit_hash = {repr(git_commit_hash)}\ngit_commit_date = {repr(git_commit_date)}')
 
     f.seek(0)
