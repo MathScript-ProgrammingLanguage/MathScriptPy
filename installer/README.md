@@ -1,0 +1,1 @@
+# MathScript installer

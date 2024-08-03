@@ -1,0 +1,9 @@
+PyQt5
+requests
+elevate
+pathvalidate
+requests
+# Building
+pyinstaller
+pillow
+svg2png
