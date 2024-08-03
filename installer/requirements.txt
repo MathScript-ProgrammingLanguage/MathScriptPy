@@ -3,6 +3,7 @@ requests
 elevate
 pathvalidate
 requests
+pathenv
 # Building
 pyinstaller
 pillow

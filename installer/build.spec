@@ -25,7 +25,7 @@ if not exists('LICENSE'):
     copy('../LICENSE', 'LICENSE')
 
 a = Analysis(
-    ['main.py', 'env.py'],
+    ['main.py'],
     pathex=[],
     binaries=[],
     datas=[('LICENSE', '.'), ('logo.svg', '.'), ('logo.ico', '.'), ('logo.png', '.')],

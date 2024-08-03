@@ -1,4 +1,4 @@
-from env import add_to_path, remove_from_path
+from pathenv import add_to_path, remove_from_path # type: ignore
 from pathvalidate import sanitize_filepath
 from pathlib import Path
 from tkinter.filedialog import askdirectory

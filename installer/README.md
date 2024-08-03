@@ -10,8 +10,6 @@ The build process require some dependencies:
 - Pillow
 - svg2png
 
-**⚠️ In future releases, the `env.py` file will be replaced with the `pathenv` package on **PyPI**. ⚠️**
-
 svg2png uses Inkscape to conver the SVG logo into PNG. If the PNG logo exists, it won't recreate it.
 
 Firstly, install the dependencies using this command:
@@ -52,6 +50,7 @@ The installer relies on the following Python libraries:
 - **requests:** For downloading the MathScript installation files.
 - **elevate:** For requesting administrator privileges on Windows.
 - **pathvalidate:** For validating file paths.
+- **pathenv:** For `PATH` manipulation.
 
 ## Contributing
 
