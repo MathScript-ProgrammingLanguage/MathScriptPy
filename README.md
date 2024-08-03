@@ -44,7 +44,14 @@ MathScript is a simple, yet powerful, programming language designed with mathema
 
 MathScript uses `cx_Freeze` for building the binaries.
 
-You can build the binaries by running the following command in the root directory of the repository:
+Firstly, you need to install the dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+Then you can build the binaries by running the following command:
+
 ```bash
 python setup.py build
 ```
