@@ -2,7 +2,7 @@ from env import add_to_path, remove_from_path
 from pathvalidate import sanitize_filepath
 from pathlib import Path
 from tkinter.filedialog import askdirectory
-import elevate
+import elevate # type: ignore
 import os
 import sys
 import tempfile
@@ -31,7 +31,7 @@ class Ui_MainWindow(object):
     else:
         program_files = '/usr/local/bin'
 
-    INSTALL_DIR = str(Path(shutil.which("mathscript")).parent) if is_installed else os.path.join(program_files, "MathScript")
+    INSTALL_DIR = str(Path(shutil.which("mathscript")).parent) if is_installed else os.path.join(program_files, "MathScript") # type: ignore
 
     def setupUi(self, MainWindow):
         MainWindow.setFixedSize(561, 362)
