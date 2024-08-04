@@ -2276,7 +2276,7 @@ class BuiltInFunction(BaseFunction):
 		code = exec_ctx.symbol_table.get('code')
 		if not isinstance(code, NullType):
 			print("Exited:", code)
-			exit(code)
+			sys.exit(code)
 		sys.exit()
 	execute_exit.positional_arg_names = []
 	execute_exit.optional_arg_names = {"code": NullType()}
