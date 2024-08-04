@@ -19,7 +19,7 @@ debug_mode = False
 from strings_with_arrows import *
 import string
 import sys
-import colorama
+import colorama # type: ignore
 
 colorama.init(convert=True)
 
@@ -2255,22 +2255,22 @@ class BuiltInFunction(BaseFunction):
 			print(str(value), end=end_char)
 
 		return RTResult().success(None)
-	execute_print.positional_arg_names = ["value"]
-	execute_print.optional_arg_names = {"sep": NullType(), "end_char": NullType()}
+	execute_print.positional_arg_names = ["value"] # type: ignore
+	execute_print.optional_arg_names = {"sep": NullType(), "end_char": NullType()} # type: ignore
 
 	def execute_input(self, exec_ctx):
 		placeholder = exec_ctx.symbol_table.get('placeholder')
 		if isinstance(placeholder, NullType): text = input()
 		else: text = input(placeholder)
 		return RTResult().success(String(text))
-	execute_input.positional_arg_names = []
-	execute_input.optional_arg_names = {"placeholder": NullType()}
+	execute_input.positional_arg_names = [] # type: ignore
+	execute_input.optional_arg_names = {"placeholder": NullType()} # type: ignore
 
 	def execute_clear(self, exec_ctx):
 		print('\033c')
 		return RTResult().success(None)
-	execute_clear.positional_arg_names = []
-	execute_clear.optional_arg_names = {}
+	execute_clear.positional_arg_names = [] # type: ignore
+	execute_clear.optional_arg_names = {} # type: ignore
 
 	def execute_exit(self, exec_ctx):
 		code = exec_ctx.symbol_table.get('code')
@@ -2278,28 +2278,28 @@ class BuiltInFunction(BaseFunction):
 			print("Exited:", code)
 			sys.exit(code)
 		sys.exit()
-	execute_exit.positional_arg_names = []
-	execute_exit.optional_arg_names = {"code": NullType()}
+	execute_exit.positional_arg_names = [] # type: ignore
+	execute_exit.optional_arg_names = {"code": NullType()} # type: ignore
 
 	def execute_type(self, exec_ctx):
 		obj = exec_ctx.symbol_table.get('obj')
 		return RTResult().success(String(obj.__class__.__name__))
-	execute_type.positional_arg_names = ["obj"]
-	execute_type.optional_arg_names = {}
+	execute_type.positional_arg_names = ["obj"] # type: ignore
+	execute_type.optional_arg_names = {} # type: ignore
 
 	def execute_sin(self, exec_ctx):
 		theta = exec_ctx.symbol_table.get('theta')
 		e = global_symbol_table.get('e')
 		return RTResult().success(Complex((e.value ** (1j * theta.value) - e.value ** (-1j * theta.value)) / 2j))
-	execute_sin.positional_arg_names = ["theta"]
-	execute_sin.optional_arg_names = {}
+	execute_sin.positional_arg_names = ["theta"] # type: ignore
+	execute_sin.optional_arg_names = {} # type: ignore
 
 	def execute_cos(self, exec_ctx):
 		theta = exec_ctx.symbol_table.get('theta')
 		e = global_symbol_table.get('e')
 		return RTResult().success(Complex((e.value ** (1j * theta.value) + e.value ** (-1j * theta.value)) / 2))
-	execute_cos.positional_arg_names = ["theta"]
-	execute_cos.optional_arg_names = {}
+	execute_cos.positional_arg_names = ["theta"] # type: ignore
+	execute_cos.optional_arg_names = {} # type: ignore
 
 ##########################################################
 # CONTEXT
