@@ -17,12 +17,13 @@ debug_mode = False
 ##########################################################
 
 from strings_with_arrows import *
-from mpmath import mpf, mpc # type: ignore
+from mpmath import mpf, mpc, mp # type: ignore
 from colorama import just_fix_windows_console # type: ignore
 import string
 import sys
 
 just_fix_windows_console()
+mp.dps = 1000
 
 ##########################################################
 # CONSTANTS
@@ -1698,8 +1699,9 @@ class Decimal(Value):
 class Complex(Value):
 	def __init__(self, value):
 		super().__init__()
-		value = complex(value)
-		self.value = mpc(str(value.real), str(value.imag))
+		if not isinstance(value, mpc):
+			value = complex(value)
+		self.value = mpc(str(float(value.real)), str(float(value.imag)))
 
 	def added_to(self, other):
 		if isinstance(other, (Integer, Decimal, Boolean, Complex)):
