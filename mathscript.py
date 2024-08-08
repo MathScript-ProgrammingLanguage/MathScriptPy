@@ -17,6 +17,7 @@ debug_mode = False
 ##########################################################
 
 from strings_with_arrows import *
+from mpmath import mpf, mpc # type: ignore
 from colorama import just_fix_windows_console # type: ignore
 import string
 import sys
@@ -1449,7 +1450,7 @@ class Integer(Value):
 		elif isinstance(other, Decimal):
 			return Decimal(self.value + other.value).set_context(self.context), None
 		elif isinstance(other, Complex):
-			return Complex(self.value + other.value).set_context(self.context), None
+			return Complex((self.value) + other.value).set_context(self.context), None
 		else:
 			return None, Value.illegal_operation(self, '+', other)
 
@@ -1573,7 +1574,7 @@ class Integer(Value):
 class Decimal(Value):
 	def __init__(self, value):
 		super().__init__()
-		self.value = float(value)
+		self.value = mpf(str(value))
 
 	def added_to(self, other):
 		if isinstance(other, (Integer, Decimal, Boolean)):
@@ -1697,7 +1698,8 @@ class Decimal(Value):
 class Complex(Value):
 	def __init__(self, value):
 		super().__init__()
-		self.value = complex(value)
+		value = complex(value)
+		self.value = mpc(str(value.real), str(value.imag))
 
 	def added_to(self, other):
 		if isinstance(other, (Integer, Decimal, Boolean, Complex)):

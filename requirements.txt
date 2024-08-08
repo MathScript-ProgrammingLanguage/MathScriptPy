@@ -1,4 +1,6 @@
-# For clearing on all OS
+# For clearing the terminal on all OS
 colorama
+# For better decimals and complexes
+mpmath
 # Building
 cx_Freeze
