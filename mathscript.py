@@ -8,7 +8,7 @@ product_name = 'MathScript'
 product_description = 'A Math programming language, by foxypiratecove37350'
 debug_modes_list = ['lexer', 'parser', 'lexer-parser', 'all']
 debug_modes_list_str = ', '.join(f"'{mode}'" for mode in debug_modes_list[:-1]) + f" or '{debug_modes_list[-1]}'" if len(debug_modes_list) != 1 else debug_modes_list[0]
-version = {'major': 1, 'minor': 0, 'build': 0, 'revision': None}
+version = {'major': 1, 'minor': 0, 'build': 1, 'revision': None}
 version_str = f'{version['major']}{f'.{version['minor']}{f'.{version['build']}{f'.{version['revision']}' if version['revision'] is not None else ''}' if version['build'] is not None else ''}' if version['minor'] is not None else ''}'
 debug_mode = False
 
@@ -17,11 +17,11 @@ debug_mode = False
 ##########################################################
 
 from strings_with_arrows import *
+from colorama import just_fix_windows_console # type: ignore
 import string
 import sys
-import colorama # type: ignore
 
-colorama.init(convert=True)
+just_fix_windows_console()
 
 ##########################################################
 # CONSTANTS
@@ -1451,7 +1451,7 @@ class Integer(Value):
 		elif isinstance(other, Complex):
 			return Complex(self.value + other.value).set_context(self.context), None
 		else:
-			return None, Value.illegal_operation(self, other)
+			return None, Value.illegal_operation(self, '+', other)
 
 	def subbed_by(self, other):
 		if isinstance(other, (Integer, Boolean)):
@@ -1461,7 +1461,7 @@ class Integer(Value):
 		elif isinstance(other, Complex):
 			return Complex(self.value - other.value).set_context(self.context), None
 		else:
-			return None, Value.illegal_operation(self, other)
+			return None, Value.illegal_operation(self, '-', other)
 
 	def multed_by(self, other):
 		if isinstance(other, (Integer, Boolean)):
@@ -1473,7 +1473,7 @@ class Integer(Value):
 		elif isinstance(other, String):
 			return String(self.value * other.value).set_context(self.context), None
 		else:
-			return None, Value.illegal_operation(self, other)
+			return None, Value.illegal_operation(self, '*', other)
 
 	def dived_by(self, other):
 		if isinstance(other, (Integer, Decimal, Boolean, Complex)):
@@ -1490,7 +1490,7 @@ class Integer(Value):
 				return Complex(self.value / other.value).set_context(self.context), None
 			return Decimal(self.value / other.value).set_context(self.context), None
 		else:
-			return None, Value.illegal_operation(self, other)
+			return None, Value.illegal_operation(self, '/', other)
 
 	def powed_by(self, other):
 		if isinstance(other, (Integer, Decimal)):
@@ -1502,57 +1502,57 @@ class Integer(Value):
 		elif isinstance(other, Complex):
 			return Complex(self.value ** other.value).set_context(self.context), None
 		else:
-			return None, Value.illegal_operation(self, other)
+			return None, Value.illegal_operation(self, '^', other)
 			
 	def get_comparison_eq(self, other):
 		if isinstance(other, (Integer, Decimal, Boolean, Complex, String, List)):
 			return Boolean(int(self.value == other.value)).set_context(self.context), None
 		else:
-			return None, Value.illegal_operation(self, other)
+			return None, Value.illegal_operation(self, '==', other)
 
 	def get_comparison_ne(self, other):
 		if isinstance(other, (Integer, Decimal, Boolean, Complex, String, List)):
 			return Boolean(int(self.value != other.value)).set_context(self.context), None
 		else:
-			return None, Value.illegal_operation(self, other)
+			return None, Value.illegal_operation(self, '!=', other)
 
 	def get_comparison_lt(self, other):
 		if isinstance(other, (Integer, Decimal, Boolean, Complex, String, List, NullType)):
 			return Boolean(int(self.value < other.value)).set_context(self.context), None
 		else:
-			return None, Value.illegal_operation(self, other)
+			return None, Value.illegal_operation(self, '>', other)
 
 	def get_comparison_gt(self, other):
 		if isinstance(other, (Integer, Decimal, Boolean, Complex, String, List, NullType)):
 			return Boolean(int(self.value > other.value)).set_context(self.context), None
 		else:
-			return None, Value.illegal_operation(self, other)
+			return None, Value.illegal_operation(self, '<', other)
 
 	def get_comparison_lte(self, other):
 		if isinstance(other, (Integer, Decimal, Boolean, Complex, String, List, NullType)):
 			return Boolean(int(self.value <= other.value)).set_context(self.context), None
 		else:
-			return None, Value.illegal_operation(self, other)
+			return None, Value.illegal_operation(self, '>=', other)
 
 	def get_comparison_gte(self, other):
 		if isinstance(other, (Integer, Decimal, Boolean, Complex, String, List, NullType)):
 			return Boolean(int(self.value >= other.value)).set_context(self.context), None
 		else:
-			return None, Value.illegal_operation(self, other)
+			return None, Value.illegal_operation(self, '<=', other)
 
 	def anded_by(self, other):
 		if isinstance(other, (Integer, Decimal, Boolean, Complex, NullType)):
 			class_ = self.__class__ if (self.value and other.value) == self else other.__class__
 			return class_(self.value and other.value).set_context(self.context), None
 		else:
-			return None, Value.illegal_operation(self, other)
+			return None, Value.illegal_operation(self, 'and', other)
 
 	def ored_by(self, other):
 		if isinstance(other, (Integer, Decimal, Boolean, Complex, NullType)):
 			class_ = self.__class__ if (self.value and other.value) == self else other.__class__
 			return class_(self.value or other.value).set_context(self.context), None
 		else:
-			return None, Value.illegal_operation(self, other)
+			return None, Value.illegal_operation(self, 'or', other)
 
 	def notted(self):
 		return Boolean(1 if self.value == 0 else 0).set_context(self.context), None
@@ -1581,7 +1581,7 @@ class Decimal(Value):
 		elif isinstance(other, Complex):
 			return Complex(self.value + other.value).set_context(self.context), None
 		else:
-			return None, Value.illegal_operation(self, other)
+			return None, Value.illegal_operation(self, '+', other)
 
 	def subbed_by(self, other):
 		if isinstance(other, (Integer, Decimal, Boolean)):
@@ -1589,7 +1589,7 @@ class Decimal(Value):
 		elif isinstance(other, Complex):
 			return Complex(self.value - other.value).set_context(self.context), None
 		else:
-			return None, Value.illegal_operation(self, other)
+			return None, Value.illegal_operation(self, '-', other)
 
 	def multed_by(self, other):
 		if isinstance(other, (Integer, Decimal, Boolean)):
@@ -1599,7 +1599,7 @@ class Decimal(Value):
 		elif isinstance(other, String):
 			return String(self.value * other.value).set_context(self.context), None
 		else:
-			return None, Value.illegal_operation(self, other)
+			return None, Value.illegal_operation(self, '*', other)
 
 	def dived_by(self, other):
 		if isinstance(other, (Integer, Decimal, Boolean, Complex)):
@@ -1616,7 +1616,7 @@ class Decimal(Value):
 				return Complex(self.value / other.value).set_context(self.context), None
 			return Decimal(self.value / other.value).set_context(self.context), None
 		else:
-			return None, Value.illegal_operation(self, other)
+			return None, Value.illegal_operation(self, '/', other)
 
 	def powed_by(self, other):
 		if isinstance(other, (Integer, Decimal, Complex)):
@@ -1626,57 +1626,57 @@ class Decimal(Value):
 		elif isinstance(other, Boolean):
 			return Decimal(self.value ** other.value).set_context(self.context), None
 		else:
-			return None, Value.illegal_operation(self, other)
+			return None, Value.illegal_operation(self, '^', other)
 			
 	def get_comparison_eq(self, other):
 		if isinstance(other, (Integer, Decimal, Boolean, Complex, String, List, NullType)):
 			return Boolean(int(self.value == other.value)).set_context(self.context), None
 		else:
-			return None, Value.illegal_operation(self, other)
+			return None, Value.illegal_operation(self, '==', other)
 
 	def get_comparison_ne(self, other):
 		if isinstance(other, (Integer, Decimal, Boolean, Complex, String, List, NullType)):
 			return Boolean(int(self.value != other.value)).set_context(self.context), None
 		else:
-			return None, Value.illegal_operation(self, other)
+			return None, Value.illegal_operation(self, '!=', other)
 
 	def get_comparison_lt(self, other):
 		if isinstance(other, (Integer, Decimal, Boolean, Complex, String, List, NullType)):
 			return Boolean(int(self.value < other.value)).set_context(self.context), None
 		else:
-			return None, Value.illegal_operation(self, other)
+			return None, Value.illegal_operation(self, '>', other)
 
 	def get_comparison_gt(self, other):
 		if isinstance(other, (Integer, Decimal, Boolean, Complex, String, List, NullType)):
 			return Boolean(int(self.value > other.value)).set_context(self.context), None
 		else:
-			return None, Value.illegal_operation(self, other)
+			return None, Value.illegal_operation(self, '<', other)
 
 	def get_comparison_lte(self, other):
 		if isinstance(other, (Integer, Decimal, Boolean, Complex, String, List, NullType)):
 			return Boolean(int(self.value <= other.value)).set_context(self.context), None
 		else:
-			return None, Value.illegal_operation(self, other)
+			return None, Value.illegal_operation(self, '>=', other)
 
 	def get_comparison_gte(self, other):
 		if isinstance(other, (Integer, Decimal, Boolean, Complex, String, List, NullType)):
 			return Boolean(int(self.value >= other.value)).set_context(self.context), None
 		else:
-			return None, Value.illegal_operation(self, other)
+			return None, Value.illegal_operation(self, '<=', other)
 
 	def anded_by(self, other):
 		if isinstance(other, (Integer, Decimal, Boolean, Complex, NullType)):
 			class_ = self.__class__ if (self.value and other.value) == self else other.__class__
 			return class_(self.value and other.value).set_context(self.context), None
 		else:
-			return None, Value.illegal_operation(self, other)
+			return None, Value.illegal_operation(self, 'and', other)
 
 	def ored_by(self, other):
 		if isinstance(other, (Integer, Decimal, Boolean, Complex, NullType)):
 			class_ = self.__class__ if (self.value and other.value) == self else other.__class__
 			return class_(self.value or other.value).set_context(self.context), None
 		else:
-			return None, Value.illegal_operation(self, other)
+			return None, Value.illegal_operation(self, 'or', other)
 
 	def notted(self):
 		return Boolean(1 if self.value == 0 else 0).set_context(self.context), None
@@ -1703,19 +1703,19 @@ class Complex(Value):
 		if isinstance(other, (Integer, Decimal, Boolean, Complex)):
 			return Complex(self.value + other.value).set_context(self.context), None
 		else:
-			return None, Value.illegal_operation(self, other)
+			return None, Value.illegal_operation(self, '+', other)
 
 	def subbed_by(self, other):
 		if isinstance(other, (Integer, Decimal, Boolean, Complex)):
 			return Complex(self.value - other.value).set_context(self.context), None
 		else:
-			return None, Value.illegal_operation(self, other)
+			return None, Value.illegal_operation(self, '-', other)
 
 	def multed_by(self, other):
 		if isinstance(other, (Integer, Decimal, Boolean, Complex)):
 			return Complex(self.value * other.value).set_context(self.context), None
 		else:
-			return None, Value.illegal_operation(self, other)
+			return None, Value.illegal_operation(self, '*', other)
 
 	def dived_by(self, other):
 		if isinstance(other, (Integer, Decimal, Boolean, Complex)):
@@ -1727,63 +1727,63 @@ class Complex(Value):
 				)
 			return Complex(self.value / other.value).set_context(self.context), None
 		else:
-			return None, Value.illegal_operation(self, other)
+			return None, Value.illegal_operation(self, '/', other)
 
 	def powed_by(self, other):
 		if isinstance(other, (Integer, Decimal, Boolean, Complex)):
 			return Complex(self.value ** other.value).set_context(self.context), None
 		else:
-			return None, Value.illegal_operation(self, other)
+			return None, Value.illegal_operation(self, '^', other)
 			
 	def get_comparison_eq(self, other):
 		if isinstance(other, (Integer, Decimal, Boolean, Complex, String, List, NullType)):
 			return Boolean(int(self.value == other.value)).set_context(self.context), None
 		else:
-			return None, Value.illegal_operation(self, other)
+			return None, Value.illegal_operation(self, '==', other)
 
 	def get_comparison_ne(self, other):
 		if isinstance(other, (Integer, Decimal, Boolean, Complex, String, List, NullType)):
 			return Boolean(int(self.value != other.value)).set_context(self.context), None
 		else:
-			return None, Value.illegal_operation(self, other)
+			return None, Value.illegal_operation(self, '!=', other)
 
 	def get_comparison_lt(self, other):
 		if isinstance(other, (Integer, Decimal, Boolean, Complex, String, List, NullType)):
 			return Boolean(int(self.value < other.value)).set_context(self.context), None
 		else:
-			return None, Value.illegal_operation(self, other)
+			return None, Value.illegal_operation(self, '>', other)
 
 	def get_comparison_gt(self, other):
 		if isinstance(other, (Integer, Decimal, Boolean, Complex, String, List, NullType)):
 			return Boolean(int(self.value > other.value)).set_context(self.context), None
 		else:
-			return None, Value.illegal_operation(self, other)
+			return None, Value.illegal_operation(self, '<', other)
 
 	def get_comparison_lte(self, other):
 		if isinstance(other, (Integer, Decimal, Boolean, Complex, String, List, NullType)):
 			return Boolean(int(self.value <= other.value)).set_context(self.context), None
 		else:
-			return None, Value.illegal_operation(self, other)
+			return None, Value.illegal_operation(self, '>=', other)
 
 	def get_comparison_gte(self, other):
 		if isinstance(other, (Integer, Decimal, Boolean, Complex, String, List, NullType)):
 			return Boolean(int(self.value >= other.value)).set_context(self.context), None
 		else:
-			return None, Value.illegal_operation(self, other)
+			return None, Value.illegal_operation(self, '<=', other)
 
 	def anded_by(self, other):
 		if isinstance(other, (Integer, Decimal, Boolean, Complex, NullType)):
 			class_ = self.__class__ if (self.value and other.value) == self else other.__class__
 			return class_(self.value and other.value).set_context(self.context), None
 		else:
-			return None, Value.illegal_operation(self, other)
+			return None, Value.illegal_operation(self, 'and', other)
 
 	def ored_by(self, other):
 		if isinstance(other, (Integer, Decimal, Boolean, Complex, NullType)):
 			class_ = self.__class__ if (self.value and other.value) == self else other.__class__
 			return class_(self.value or other.value).set_context(self.context), None
 		else:
-			return None, Value.illegal_operation(self, other)
+			return None, Value.illegal_operation(self, 'or', other)
 
 	def notted(self):
 		return Boolean(1 if self.value == 0 else 0).set_context(self.context), None
@@ -1814,7 +1814,7 @@ class Boolean(Value):
 		elif isinstance(other, Complex):
 			return Complex(self.value + other.value).set_context(self.context), None
 		else:
-			return None, Value.illegal_operation(self, other)
+			return None, Value.illegal_operation(self, '+', other)
 
 	def subbed_by(self, other):
 		if isinstance(other, (Integer, Boolean)):
@@ -1824,7 +1824,7 @@ class Boolean(Value):
 		elif isinstance(other, Complex):
 			return Complex(self.value - other.value).set_context(self.context), None
 		else:
-			return None, Value.illegal_operation(self, other)
+			return None, Value.illegal_operation(self, '-', other)
 
 	def multed_by(self, other):
 		if isinstance(other, (Integer, Boolean)):
@@ -1836,7 +1836,7 @@ class Boolean(Value):
 		elif isinstance(other, String):
 			return String(self.value * other.value).set_context(self.context), None
 		else:
-			return None, Value.illegal_operation(self, other)
+			return None, Value.illegal_operation(self, '*', other)
 
 	def dived_by(self, other):
 		if isinstance(other, (Integer, Decimal, Boolean, Complex)):
@@ -1851,7 +1851,7 @@ class Boolean(Value):
 				return Complex(self.value / other.value).set_context(self.context), None
 			return Decimal(self.value / other.value).set_context(self.context), None
 		else:
-			return None, Value.illegal_operation(self, other)
+			return None, Value.illegal_operation(self, '/', other)
 
 	def powed_by(self, other):
 		if isinstance(other, (Integer, Boolean)):
@@ -1861,57 +1861,57 @@ class Boolean(Value):
 		elif isinstance(other, Complex):
 			return Complex(self.value ** other.value).set_context(self.context), None
 		else:
-			return None, Value.illegal_operation(self, other)
+			return None, Value.illegal_operation(self, '^', other)
 			
 	def get_comparison_eq(self, other):
 		if isinstance(other, (Integer, Decimal, Boolean, Complex, String, List, NullType)):
 			return Boolean(int(self.value == other.value)).set_context(self.context), None
 		else:
-			return None, Value.illegal_operation(self, other)
+			return None, Value.illegal_operation(self, '==', other)
 
 	def get_comparison_ne(self, other):
 		if isinstance(other, (Integer, Decimal, Boolean, Complex, String, List, NullType)):
 			return Boolean(int(self.value != other.value)).set_context(self.context), None
 		else:
-			return None, Value.illegal_operation(self, other)
+			return None, Value.illegal_operation(self, '!=', other)
 
 	def get_comparison_lt(self, other):
 		if isinstance(other, (Integer, Decimal, Boolean, Complex, String, List, NullType)):
 			return Boolean(int(self.value < other.value)).set_context(self.context), None
 		else:
-			return None, Value.illegal_operation(self, other)
+			return None, Value.illegal_operation(self, '>', other)
 
 	def get_comparison_gt(self, other):
 		if isinstance(other, (Integer, Decimal, Boolean, Complex, String, List, NullType)):
 			return Boolean(int(self.value > other.value)).set_context(self.context), None
 		else:
-			return None, Value.illegal_operation(self, other)
+			return None, Value.illegal_operation(self, '<', other)
 
 	def get_comparison_lte(self, other):
 		if isinstance(other, (Integer, Decimal, Boolean, Complex, String, List, NullType)):
 			return Boolean(int(self.value <= other.value)).set_context(self.context), None
 		else:
-			return None, Value.illegal_operation(self, other)
+			return None, Value.illegal_operation(self, '>=', other)
 
 	def get_comparison_gte(self, other):
 		if isinstance(other, (Integer, Decimal, Boolean, Complex, String, List, NullType)):
 			return Boolean(int(self.value >= other.value)).set_context(self.context), None
 		else:
-			return None, Value.illegal_operation(self, other)
+			return None, Value.illegal_operation(self, '<=', other)
 
 	def anded_by(self, other):
 		if isinstance(other, (Integer, Decimal, Boolean, Complex, NullType)):
 			class_ = self.__class__ if (self.value and other.value) == self else other.__class__
 			return class_(self.value and other.value).set_context(self.context), None
 		else:
-			return None, Value.illegal_operation(self, other)
+			return None, Value.illegal_operation(self, 'and', other)
 
 	def ored_by(self, other):
 		if isinstance(other, (Integer, Decimal, Boolean, Complex, NullType)):
 			class_ = self.__class__ if (self.value and other.value) == self else other.__class__
 			return class_(self.value or other.value).set_context(self.context), None
 		else:
-			return None, Value.illegal_operation(self, other)
+			return None, Value.illegal_operation(self, 'or', other)
 
 	def notted(self):
 		return Boolean(1 if self.value == 0 else 0).set_context(self.context), None
@@ -1938,25 +1938,25 @@ class NullType(Value):
 		if isinstance(other, (Integer, Decimal, Boolean, NullType, String, List)):
 			return Boolean(0 if not isinstance(other, NullType) else 1).set_context(self.context), None
 		else:
-			return None, Value.illegal_operation(self, other)
+			return None, Value.illegal_operation(self, '==', other)
 
 	def get_comparison_ne(self, other):
 		if isinstance(other, (Integer, Decimal, Boolean, NullType, String, List)):
 			return Boolean(1 if not isinstance(other, NullType) else 0).set_context(self.context), None
 		else:
-			return None, Value.illegal_operation(self, other)
+			return None, Value.illegal_operation(self, '!=', other)
 
 	def anded_by(self, other):
 		if isinstance(other, (Integer, Decimal, Boolean, NullType)):
 			return other.__class__(other.value).set_context(self.context), None
 		else:
-			return None, Value.illegal_operation(self, other)
+			return None, Value.illegal_operation(self, 'and', other)
 
 	def ored_by(self, other):
 		if isinstance(other, (Integer, Decimal, Boolean, NullType)):
 			return other.__class__(other.value).set_context(self.context), None
 		else:
-			return None, Value.illegal_operation(self, other)
+			return None, Value.illegal_operation(self, 'or', other)
 
 	def notted(self):
 		return Boolean(1), None
@@ -1983,13 +1983,13 @@ class String(Value):
 		if isinstance(other, String):
 			return String(self.value + other.value).set_context(self.context), None
 		else:
-			return None, Value.illegal_operation(self, other)
+			return None, Value.illegal_operation(self, '+', other)
 
 	def multed_by(self, other):
 		if isinstance(other, (Integer, Boolean)):
 			return String(self.value * other.value).set_context(self.context), None
 		else:
-			return None, Value.illegal_operation(self, other)
+			return None, Value.illegal_operation(self, '*', other)
 			
 	def subscred_by(self, other):
 		if isinstance(other, (Integer, Boolean)):
@@ -2002,43 +2002,43 @@ class String(Value):
 					self.context
 				)
 		else:
-			return None, Value.illegal_operation(self, other)
+			return None, Value.illegal_operation(self, '_', other)
 
 	def get_comparison_eq(self, other):
 		if isinstance(other, (Integer, Decimal, Boolean, Complex, String, List, NullType)):
 			return Boolean(int(self.value == other.value)).set_context(self.context), None
 		else:
-			return None, Value.illegal_operation(self, other)
+			return None, Value.illegal_operation(self, '==', other)
 
 	def get_comparison_ne(self, other):
 		if isinstance(other, (Integer, Decimal, Boolean, Complex, String, List, NullType)):
 			return Boolean(int(self.value != other.value)).set_context(self.context), None
 		else:
-			return None, Value.illegal_operation(self, other)
+			return None, Value.illegal_operation(self, '!=', other)
 
 	def get_comparison_lt(self, other):
 		if isinstance(other, (Integer, Decimal, Boolean, Complex, String, List, NullType)):
 			return Boolean(int(self.value > other.value)).set_context(self.context), None
 		else:
-			return None, Value.illegal_operation(self, other)
+			return None, Value.illegal_operation(self, '>', other)
 
 	def get_comparison_gt(self, other):
 		if isinstance(other, (Integer, Decimal, Boolean, Complex, String, List, NullType)):
 			return Boolean(int(self.value < other.value)).set_context(self.context), None
 		else:
-			return None, Value.illegal_operation(self, other)
+			return None, Value.illegal_operation(self, '<', other)
 
 	def get_comparison_lte(self, other):
 		if isinstance(other, (Integer, Decimal, Boolean, Complex, String, List, NullType)):
 			return Boolean(int(self.value >= other.value)).set_context(self.context), None
 		else:
-			return None, Value.illegal_operation(self, other)
+			return None, Value.illegal_operation(self, '>=', other)
 
 	def get_comparison_gte(self, other):
 		if isinstance(other, (Integer, Decimal, Boolean, Complex, String, List, NullType)):
 			return Boolean(int(self.value <= other.value)).set_context(self.context), None
 		else:
-			return None, Value.illegal_operation(self, other)
+			return None, Value.illegal_operation(self, '<=', other)
 		
 	def notted(self):
 		return Boolean(1 if len(self.value) == 0 else 0).set_context(self.context), None
@@ -2064,9 +2064,12 @@ class List(Value):
 		self.elements = elements
 
 	def added_to(self, other):
-		new_list = self.copy()
-		new_list.elements.append(other)
-		return new_list, None
+		if isinstance(other, List):
+			new_list = self.copy()
+			new_list.elements += other.elements
+			return new_list, None
+		else:
+			return None, Value.illegal_operation(self, '+', other)
 
 	def subbed_by(self, other):
 		if isinstance(other, (Integer, Boolean)):
@@ -2081,7 +2084,7 @@ class List(Value):
 					self.context
 				)
 		else:
-			return None, Value.illegal_operation(self, other)
+			return None, Value.illegal_operation(self, '-', other)
 
 	def multed_by(self, other):
 		if isinstance(other, List):
@@ -2091,7 +2094,7 @@ class List(Value):
 		elif isinstance(other, Integer):
 			return List(self.copy().elements * other.value), None
 		else:
-			return None, Value.illegal_operation(self, other)
+			return None, Value.illegal_operation(self, '*', other)
 
 	def subscred_by(self, other):
 		if isinstance(other, (Integer, Boolean)):
@@ -2103,6 +2106,8 @@ class List(Value):
 					'Element at this index could not be retrived from list because index is out of bounds',
 					self.context
 				)
+		else:
+			return None, Value.illegal_operation(self, '_', other)
 
 	def __repr__(self):
 		if len(self.elements) == 0:
