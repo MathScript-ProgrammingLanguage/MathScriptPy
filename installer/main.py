@@ -1,3 +1,4 @@
+import subprocess
 from pathenv import add_to_path, remove_from_path # type: ignore
 from pathvalidate import sanitize_filepath
 from pathlib import Path
@@ -32,6 +33,11 @@ class Ui_MainWindow(object):
         program_files = '/usr/local/bin'
 
     INSTALL_DIR = str(Path(shutil.which("mathscript")).parent) if is_installed else os.path.join(program_files, "MathScript") # type: ignore
+
+    try:
+        INSTALLED_VERSION = subprocess.check_output(['mathscript', '--version']).decode('utf-8').strip().removeprefix('MathScript ') if is_installed else None
+    except subprocess.CalledProcessError:
+        INSTALLED_VERSION = None
 
     def setupUi(self, MainWindow):
         MainWindow.setFixedSize(561, 362)
@@ -98,6 +104,12 @@ class Ui_MainWindow(object):
         self.commandLinkButton_uninstall.clicked.connect(self.to_uninstall_page)
         self.commandLinkButton_uninstall.setObjectName("commandLinkButton_uninstall")
 
+        self.commandLinkButton_update = QtWidgets.QCommandLinkButton(self.centralwidget)
+        self.commandLinkButton_update.setText("Update")
+        self.commandLinkButton_update.setGeometry(QtCore.QRect(180, 200, 351, 41))
+        self.commandLinkButton_update.clicked.connect(self.to_install_process_page)
+        self.commandLinkButton_update.setObjectName("commandLinkButton_update")
+
         self.textBrowser = QtWidgets.QTextBrowser(self.centralwidget)
         self.textBrowser.setGeometry(QtCore.QRect(170, 100, 371, 221))
         self.textBrowser.setStyleSheet("background-color: transparent;")
@@ -139,6 +151,7 @@ class Ui_MainWindow(object):
         self.commandLinkButton_install.hide()
         self.commandLinkButton_repair.hide()
         self.commandLinkButton_uninstall.hide()
+        self.commandLinkButton_update.hide()
         self.textBrowser.hide()
         self.progressBar.hide()
         self.pushButton_next.hide()
@@ -167,6 +180,13 @@ class Ui_MainWindow(object):
         if is_installed:
             self.commandLinkButton_repair.show()
             self.commandLinkButton_uninstall.show()
+
+            resp = requests.get('https://api.github.com/repos/foxypiratecove37350/MathScript/releases/latest')
+            latest_version = resp.json()["tag_name"] if resp.status_code == 200 else None
+            
+            if self.INSTALLED_VERSION and latest_version and \
+               self.INSTALLED_VERSION < latest_version:
+                self.commandLinkButton_update.show()
         else:
             self.commandLinkButton_install.show()
 
@@ -219,7 +239,7 @@ class Ui_MainWindow(object):
 
         self.lineEdit_folder_path.textEdited.connect(check)
 
-    def to_install_process_page(self, path = None):
+    def to_install_process_page(self, path = None, version='latest'):
         self.hide_all()
         self.progressBar.show()
         self.pushButton_back.hide()
@@ -231,7 +251,7 @@ class Ui_MainWindow(object):
         temp_dir = tempfile.gettempdir()
         temp_file_path = os.path.join(temp_dir, file_to_download)
 
-        url = f"https://github.com/foxypiratecove37350/MathScript/releases/latest/download/{file_to_download}"
+        url = f"https://github.com/foxypiratecove37350/MathScript/releases/{version}/download/{file_to_download}"
 
         response = requests.get(url, stream=True)
         total_size = int(response.headers.get('content-length', 0))
@@ -348,7 +368,7 @@ class Ui_MainWindow(object):
         self.label_instructions.setText("Are you sure you want to repair MathScript?")
             
         self.pushButton_next.setText("Repair")
-        self.pushButton_next.clicked.connect(lambda: [remove_from_path(self.INSTALL_DIR), self.to_install_process_page()])
+        self.pushButton_next.clicked.connect(lambda: [remove_from_path(self.INSTALL_DIR), self.to_install_process_page(version=self.INSTALLED_VERSION)])
         self.pushButton_back.clicked.connect(self.to_startup_page)
 
 app = QApplication([])
