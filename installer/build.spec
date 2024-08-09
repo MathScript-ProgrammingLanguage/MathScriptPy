@@ -4,8 +4,9 @@ from PIL import Image
 from shutil import copy2 as copy
 from os import remove
 from os.path import exists
-import sys
 from svg2png import svg2png
+import sys
+import platform
 
 if not exists('logo.svg'):
     copy('../logo.svg', 'logo.svg')
@@ -45,7 +46,7 @@ exe = EXE(
     a.binaries,
     a.datas,
     [],
-    name='MathScript Installer',
+    name=f'MathScript_Installer_{platform.system().replace('Darwin', 'macOS')}',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
