@@ -62,8 +62,8 @@ def main():
 
 			if error: print(error.as_string())
 			elif result is not None:
-				rst = [repr(x) for x in result.elements if x is not None]
-				if len(result.elements) == 1 and result.elements[0] is not None:
+				rst = [repr(x) for x in result.elements if not getattr(x, 'hidden', False)]
+				if len(result.elements) == 1 and not getattr(result.elements[0], 'hidden', False):
 					print(repr(result.elements[0]))
 				elif len(rst) == 0: pass
 				else: print('\n'.join(rst))
