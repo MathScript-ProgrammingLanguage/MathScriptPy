@@ -2855,7 +2855,7 @@ def run(fn, text):
 
 	if debug_mode == debug_modes_list[3]:
 		if result.value is not None:
-			print("Multiline list:", result.value, [repr(x) for x in result.value.elements if not getattr(x, 'hidden', False)], sep='\n    ')
+			print("Multiline list:", result.value, [repr(x) for x in result.value.elements if not getattr(x, 'hidden', False) and x is not None], sep='\n    ')
 		else:
 			print("Multiline list:", result.value, sep='\n    ')
 
