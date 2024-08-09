@@ -247,7 +247,7 @@ class Ui_MainWindow(object):
         self.label_instructions.setText("Downloading files...")
         self.pushButton_next.setText("Next")
 
-        file_to_download = f"mathscript_{platform.system().lower()}.zip"
+        file_to_download = f"mathscript_{platform.system().lower().replace('darwin', 'macos')}.zip"
         temp_dir = tempfile.gettempdir()
         temp_file_path = os.path.join(temp_dir, file_to_download)
 
