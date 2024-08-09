@@ -45,7 +45,7 @@ try:
         description = mathscript.product_description,
         options = {'build_exe': build_options},
         executables = executables)
-    make_archive(f'dist/{mathscript.product_name.lower()}_{platform.system().lower().replace('darwin', 'macos')}', 'zip', f'dist/exe.{sysconfig.get_platform()}-{sysconfig.get_python_version()}')
+    make_archive(f'build/{mathscript.product_name.lower()}_{platform.system().lower().replace('darwin', 'macos')}', 'zip', f'build/exe.{sysconfig.get_platform()}-{sysconfig.get_python_version()}')
 finally:
     with open('shell.py', 'w') as f:
         f.write(original_content)
