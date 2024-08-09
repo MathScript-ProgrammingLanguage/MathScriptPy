@@ -251,7 +251,7 @@ class Ui_MainWindow(object):
         temp_dir = tempfile.gettempdir()
         temp_file_path = os.path.join(temp_dir, file_to_download)
 
-        url = f"https://github.com/foxypiratecove37350/MathScript/releases/{version}/download/{file_to_download}"
+        url = f"https://github.com/foxypiratecove37350/MathScript/releases/{version + '/download' if version == 'latest' else 'download/' + version + '/'}{file_to_download}"
 
         response = requests.get(url, stream=True)
         total_size = int(response.headers.get('content-length', 0))
@@ -368,7 +368,7 @@ class Ui_MainWindow(object):
         self.label_instructions.setText("Are you sure you want to repair MathScript?")
             
         self.pushButton_next.setText("Repair")
-        self.pushButton_next.clicked.connect(lambda: [remove_from_path(self.INSTALL_DIR), self.to_install_process_page(version=f'tags/{self.INSTALLED_VERSION}')])
+        self.pushButton_next.clicked.connect(lambda: [remove_from_path(self.INSTALL_DIR), self.to_install_process_page(version=self.INSTALLED_VERSION)])
         self.pushButton_back.clicked.connect(self.to_startup_page)
 
 app = QApplication([])
