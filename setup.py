@@ -1,4 +1,7 @@
+import platform
+import sysconfig
 from cx_Freeze import setup, Executable # type: ignore
+from shutil import make_archive
 import mathscript
 import subprocess
 
@@ -36,11 +39,13 @@ executables = [
     Executable('shell.py', base=base, target_name = mathscript.product_name.lower())
 ]
 
-setup(name=mathscript.product_name,
-      version = mathscript.version_str,
-      description = mathscript.product_description,
-      options = {'build_exe': build_options},
-      executables = executables)
-
-with open('shell.py', 'w') as f:
-    f.write(original_content)
+try:
+    setup(name=mathscript.product_name,
+        version = mathscript.version_str,
+        description = mathscript.product_description,
+        options = {'build_exe': build_options},
+        executables = executables)
+    make_archive(f'dist/{mathscript.product_name.lower()}_{platform.system().lower().replace('darwin', 'macos')}', 'zip', f'dist/exe.{sysconfig.get_platform()}-{sysconfig.get_python_version()}')
+finally:
+    with open('shell.py', 'w') as f:
+        f.write(original_content)

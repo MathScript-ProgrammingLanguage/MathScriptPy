@@ -1,6 +1,6 @@
-git_release_tag = 'v1.0.0-17-ga308989'
-git_commit_hash = 'a308989'
-git_commit_date = 'Aug  9 2024, 17:55:15'
+git_release_tag = 'latest'
+git_commit_hash = 'latest'
+git_commit_date = None
 
 import platform
 import mathscript
