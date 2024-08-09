@@ -2039,6 +2039,7 @@ class NullType(Value):
 	def __init__(self, value = None):
 		super().__init__()
 		self.value = value or 'null'
+		self._value = value
 		self.hidden = value is None
 
 	def get_comparison_eq(self, other):
@@ -2069,7 +2070,7 @@ class NullType(Value):
 		return Boolean(1), None
 
 	def copy(self):
-		copy = NullType(self.value)
+		copy = NullType(self._value)
 		copy.set_pos(self.pos_start, self.pos_end)
 		copy.set_context(self.context)
 
@@ -2426,7 +2427,7 @@ class BuiltInFunction(BaseFunction):
 			))
 
 		code_or_filename = code_or_filename.value
-		is_filename = re.match('((^([a-z]|[A-Z]):(?=\\(?![\0-\37<>:"/\\|?*])|\/(?![\0-\37<>:"/\\|?*])|$)|^\\(?=[\\\/][^\0-\37<>:"/\\|?*]+)|^(?=(\\|\/)$)|^\.(?=(\\|\/)$)|^\.\.(?=(\\|\/)$)|^(?=(\\|\/)[^\0-\37<>:"/\\|?*]+)|^\.(?=(\\|\/)[^\0-\37<>:"/\\|?*]+)|^\.\.(?=(\\|\/)[^\0-\37<>:"/\\|?*]+))((\\|\/)[^\0-\37<>:"/\\|?*]+|(\\|\/)$)*()$)|(^\/$|(^(?=\/)|^\.|^\.\.)(\/(?=[^/\0])[^/\0]+)*\/?$)', code_or_filename)
+		is_filename = re.match(r'((^([a-z]|[A-Z]):(?=\\(?![\0-\37<>:"/\\|?*])|\/(?![\0-\37<>:"/\\|?*])|$)|^\\(?=[\\\/][^\0-\37<>:"/\\|?*]+)|^(?=(\\|\/)$)|^\.(?=(\\|\/)$)|^\.\.(?=(\\|\/)$)|^(?=(\\|\/)[^\0-\37<>:"/\\|?*]+)|^\.(?=(\\|\/)[^\0-\37<>:"/\\|?*]+)|^\.\.(?=(\\|\/)[^\0-\37<>:"/\\|?*]+))((\\|\/)[^\0-\37<>:"/\\|?*]+|(\\|\/)$)*()$)|(^\/$|(^(?=\/)|^\.|^\.\.)(\/(?=[^/\0])[^/\0]+)*\/?$)', code_or_filename)
 		filename = code_or_filename if is_filename else '<code>'
 		
 		if is_filename:
@@ -2452,8 +2453,8 @@ class BuiltInFunction(BaseFunction):
 			))
 		
 		return RTResult().success(NullType())
-	execute_run.positional_arg_names = ["code_or_filename"] # type: ignore
-	execute_run.optional_arg_names = {} # type: ignore
+	execute_exec.positional_arg_names = ["code_or_filename"] # type: ignore
+	execute_exec.optional_arg_names = {} # type: ignore
 
 	def execute_length(self, exec_ctx):
 		iterable = exec_ctx.symbol_table.get('iterable')
@@ -2854,7 +2855,7 @@ def run(fn, text):
 
 	if debug_mode == debug_modes_list[3]:
 		if result.value is not None:
-			print("Multiline list:", result.value, [repr(x) for x in result.value.elements if x is not None], sep='\n    ')
+			print("Multiline list:", result.value, [repr(x) for x in result.value.elements if not getattr(x, 'hidden', False)], sep='\n    ')
 		else:
 			print("Multiline list:", result.value, sep='\n    ')
 
