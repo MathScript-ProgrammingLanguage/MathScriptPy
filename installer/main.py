@@ -35,7 +35,11 @@ class Ui_MainWindow(object):
     INSTALL_DIR = str(Path(shutil.which("mathscript")).parent) if is_installed else os.path.join(program_files, "MathScript") # type: ignore
 
     try:
-        INSTALLED_VERSION = subprocess.check_output(['mathscript', '--version']).decode('utf-8').strip().removeprefix('MathScript ') if is_installed else None
+        INSTALLED_VERSION = subprocess.check_output(
+            ['mathscript', '--version'],
+            stdout=subprocess.DEVNULL,            # type: ignore
+            stderr=subprocess.DEVNULL             # type: ignore
+        ).decode('utf-8').strip().removeprefix('MathScript ') if is_installed else None
     except subprocess.CalledProcessError:
         INSTALLED_VERSION = None
 
@@ -217,7 +221,7 @@ class Ui_MainWindow(object):
         self.pushButton_next.setText("Next")
 
         self.pushButton_select_path.clicked.connect(lambda: self.lineEdit_folder_path.setText(askdirectory(title='Choose MathScript installation directory')))
-        self.pushButton_next.clicked.connect(lambda: self.to_install_process_page(self.lineEdit_folder_path.text()))
+        self.pushButton_next.clicked.connect(lambda: self.to_install_process_page(path=self.lineEdit_folder_path.text()))
         self.pushButton_back.clicked.connect(self.to_license_page)
 
         self.lineEdit_folder_path.setText(self.INSTALL_DIR)
@@ -251,7 +255,8 @@ class Ui_MainWindow(object):
         temp_dir = tempfile.gettempdir()
         temp_file_path = os.path.join(temp_dir, file_to_download)
 
-        url = f"https://github.com/foxypiratecove37350/MathScript/releases/{version + '/download' if version == 'latest' else 'download/' + version + '/'}{file_to_download}"
+        url = f"https://github.com/foxypiratecove37350/MathScript/releases/{version + '/download/' if version == 'latest' else 'download/' + version + '/'}{file_to_download}"
+        print(url)
 
         response = requests.get(url, stream=True)
         total_size = int(response.headers.get('content-length', 0))
@@ -368,7 +373,7 @@ class Ui_MainWindow(object):
         self.label_instructions.setText("Are you sure you want to repair MathScript?")
             
         self.pushButton_next.setText("Repair")
-        self.pushButton_next.clicked.connect(lambda: [remove_from_path(self.INSTALL_DIR), self.to_install_process_page(version=self.INSTALLED_VERSION)])
+        self.pushButton_next.clicked.connect(lambda: [remove_from_path(self.INSTALL_DIR), self.to_install_process_page(path=self.INSTALL_DIR, version=self.INSTALLED_VERSION)])
         self.pushButton_back.clicked.connect(self.to_startup_page)
 
 app = QApplication([])
