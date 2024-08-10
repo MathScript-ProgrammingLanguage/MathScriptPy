@@ -24,6 +24,77 @@ def res(str):
 
     return os.path.join(base_path, str)
 
+class DownloadWorker(QtCore.QThread):
+    progress = QtCore.pyqtSignal(int)
+    finished = QtCore.pyqtSignal(str)
+
+    def __init__(self, url, download_path):
+        super().__init__()
+        self.url = url
+        self.download_path = download_path
+
+    def run(self):
+        response = requests.get(self.url, stream=True)
+        total_size = int(response.headers.get('content-length', 0))
+        block_size = 1024
+        progress = 0
+
+        with open(self.download_path, 'wb') as file:
+            for data in response.iter_content(block_size):
+                file.write(data)
+                progress += len(data)
+                self.progress.emit(int(progress / total_size * 100))
+
+        self.finished.emit(self.download_path)
+
+
+class UnzipWorker(QtCore.QThread):
+    progress = QtCore.pyqtSignal(int)
+    finished = QtCore.pyqtSignal(str)
+
+    def __init__(self, zip_path, extract_to):
+        super().__init__()
+        self.zip_path = zip_path
+        self.extract_to = extract_to
+
+    def run(self):
+        with zipfile.ZipFile(self.zip_path, 'r') as zip_ref:
+            total_files = len(zip_ref.infolist())
+            for i, file in enumerate(zip_ref.infolist()):
+                zip_ref.extract(file, self.extract_to)
+                self.progress.emit(int((i + 1) / total_files * 100))
+
+        os.remove(self.zip_path)
+        self.finished.emit(self.extract_to)
+
+
+class RemoveWorker(QtCore.QThread):
+    progress = QtCore.pyqtSignal(int)
+    finished = QtCore.pyqtSignal()
+
+    def __init__(self, directory):
+        super().__init__()
+        self.directory = directory
+
+    def run(self):
+        if os.path.exists(self.directory):
+            total_files = len(list(Path(self.directory).rglob('*')))
+            progress = 0
+
+            def delete_directory(path):
+                nonlocal progress
+                for item in Path(path).iterdir():
+                    if item.is_dir():
+                        delete_directory(item)
+                    else:
+                        item.unlink()
+                    progress += 1
+                    self.progress.emit(int(progress / total_files * 100))
+                Path(path).rmdir()
+
+            delete_directory(self.directory)
+            self.finished.emit()
+
 class Ui_MainWindow(object):
     if platform.system() == 'Windows':
         program_files = os.environ.get('PROGRAMFILES', 'C:\\Program Files')
@@ -34,13 +105,21 @@ class Ui_MainWindow(object):
 
     INSTALL_DIR = str(Path(shutil.which("mathscript")).parent) if is_installed else os.path.join(program_files, "MathScript") # type: ignore
 
-    try:
-        INSTALLED_VERSION = subprocess.check_output(
-            ['mathscript', '--version'],
-            stdout=subprocess.DEVNULL,            # type: ignore
-            stderr=subprocess.DEVNULL             # type: ignore
-        ).decode('utf-8').strip().removeprefix('MathScript ') if is_installed else None
-    except subprocess.CalledProcessError:
+    if is_installed:
+        try:
+            if getattr(sys, '_MEIPASS', None):
+                INSTALLED_VERSION = subprocess.check_output(
+                    ['mathscript', '--version'],
+                    stdout=subprocess.DEVNULL,            # type: ignore
+                    stderr=subprocess.DEVNULL             # type: ignore
+                ).decode('utf-8').strip().removeprefix('MathScript ')
+            else:
+                INSTALLED_VERSION = subprocess.check_output(
+                    ['mathscript', '--version']
+                ).decode('utf-8').strip().removeprefix('MathScript ')
+        except subprocess.CalledProcessError:
+            INSTALLED_VERSION = None
+    else:
         INSTALLED_VERSION = None
 
     def setupUi(self, MainWindow):
@@ -256,37 +335,28 @@ class Ui_MainWindow(object):
         temp_file_path = os.path.join(temp_dir, file_to_download)
 
         url = f"https://github.com/foxypiratecove37350/MathScript/releases/{version + '/download/' if version == 'latest' else 'download/' + version + '/'}{file_to_download}"
-        print(url)
 
-        response = requests.get(url, stream=True)
-        total_size = int(response.headers.get('content-length', 0))
-        block_size = 1024
-        progress = 0
+        self.current_install_dir = path or self.INSTALL_DIR
 
-        with open(temp_file_path, 'wb') as file:
-            for data in response.iter_content(block_size):
-                file.write(data)
-                progress += len(data)
-                self.progressBar.setValue(int(progress / total_size * 100))
+        self.download_worker = DownloadWorker(url, temp_file_path)
+        self.download_worker.progress.connect(self.progressBar.setValue)
+        self.download_worker.finished.connect(self.on_download_finished)
+        self.download_worker.start()
 
+    def on_download_finished(self, download_path):
         self.label_instructions.setText("Unzipping files...")
 
-        install_dir = path or self.INSTALL_DIR
-        os.makedirs(install_dir, exist_ok=True)
+        self.unzip_worker = UnzipWorker(download_path, self.current_install_dir)
+        self.unzip_worker.progress.connect(self.progressBar.setValue)
+        self.unzip_worker.finished.connect(self.on_installation_finished)
+        self.unzip_worker.start()
 
-        with zipfile.ZipFile(temp_file_path, 'r') as zip_ref:
-            total_files = len(zip_ref.infolist())
-            for i, file in enumerate(zip_ref.infolist()):
-                zip_ref.extract(file, install_dir)
-                self.progressBar.setValue(int((i + 1) / total_files * 100))
-        
-        os.remove(temp_file_path)
-
+    def on_installation_finished(self, temp_file_path):
         try:
             self.label_instructions.setText("Adding to PATH")
             self.progressBar.hide()
             elevate.elevate()
-            add_to_path(install_dir)
+            add_to_path(self.current_install_dir)
             self.to_installation_finished_page()
         except OSError:
             self.label_instructions.setText("Installation failed. Please run the installer as administrator/allow administrator privileges.")
@@ -294,7 +364,7 @@ class Ui_MainWindow(object):
             self.pushButton_back.hide()
             self.pushButton_next.hide()
 
-            os.remove(install_dir)
+            os.remove(self.current_install_dir)
 
     def to_installation_finished_page(self):
         self.hide_all()
@@ -323,30 +393,13 @@ class Ui_MainWindow(object):
 
             install_dir = self.INSTALL_DIR
             if os.path.exists(install_dir):
-                total_files = len(list(Path(install_dir).rglob('*')))
-                progress = 0
-
-                def delete_directory(path):
-                    for item in Path(path).iterdir():
-                        if item.is_dir():
-                            delete_directory(item)
-                        else:
-                            item.unlink()
-                        nonlocal progress
-                        progress += 1
-                        self.progressBar.setValue(int(progress / total_files * 100))
-                    Path(path).rmdir()
-
                 try:
-                    delete_directory(install_dir)
-                    self.progressBar.setValue(100)
-                    self.progressBar.hide()
-                    self.label_instructions.setText("Removing from the PATH...")
-                    remove_from_path(install_dir)
-                    self.label_instructions.setText("Uninstallation completed.")
+                    self.remove_worker = RemoveWorker(install_dir)
+                    self.remove_worker.progress.connect(self.progressBar.setValue)
+                    self.remove_worker.finished.connect(self.on_uninstallation_finished)
+                    self.remove_worker.start()
+                    self.pushButton_next.hide()
                     self.pushButton_back.hide()
-                    self.pushButton_next.setText("Quit")
-                    self.pushButton_next.clicked.connect(self.MainWindow.close)
                 except Exception as e:
                     self.label_instructions.setText(f"Uninstallation failed:")
                     self.textBrowser.show()
@@ -364,6 +417,15 @@ class Ui_MainWindow(object):
         self.pushButton_next.setText("Uninstall")
         self.pushButton_next.clicked.connect(uninstall)
         self.pushButton_back.clicked.connect(self.to_startup_page)
+
+    def on_uninstallation_finished(self):
+        self.progressBar.hide()
+        self.label_instructions.setText("Removing from the PATH...")
+        remove_from_path(self.INSTALL_DIR)
+        self.label_instructions.setText("Uninstallation completed.")
+        self.pushButton_next.show()
+        self.pushButton_next.setText("Quit")
+        self.pushButton_next.clicked.connect(self.MainWindow.close)
 
     def to_repair_page(self):
         self.hide_all()
