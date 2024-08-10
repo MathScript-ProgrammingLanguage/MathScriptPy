@@ -16,12 +16,12 @@ if not exists('logo.png'):
     except:
         pass
 if not exists('logo.ico'):
-    image = Image.open('logo.png')
+image = Image.open('logo.png')
 
-    sizes = [(16, 16), (32, 32), (48, 48), (64, 64), (128, 128), (256, 256)]
-    resized_images = [image.resize(size, Image.BICUBIC) for size in sizes]
+sizes = [(16, 16), (32, 32), (48, 48), (64, 64), (128, 128), (256, 256)]
+resized_images = [image.resize(size, Image.BICUBIC) for size in sizes]
 
-    resized_images[0].save('logo.ico', format='ICO', sizes=sizes, append_images=[img for img in resized_images[1:]])
+resized_images[-1].save('logo.ico', format='ICO', sizes=sizes, append_images=resized_images)
 if not exists('LICENSE'):
     copy('../LICENSE', 'LICENSE')
 
