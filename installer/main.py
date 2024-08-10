@@ -107,16 +107,10 @@ class Ui_MainWindow(object):
 
     if is_installed:
         try:
-            if getattr(sys, '_MEIPASS', None):
-                INSTALLED_VERSION = subprocess.check_output(
-                    ['mathscript', '--version'],
-                    stdout=subprocess.DEVNULL,            # type: ignore
-                    stderr=subprocess.DEVNULL             # type: ignore
-                ).decode('utf-8').strip().removeprefix('MathScript ')
-            else:
-                INSTALLED_VERSION = subprocess.check_output(
-                    ['mathscript', '--version']
-                ).decode('utf-8').strip().removeprefix('MathScript ')
+            INSTALLED_VERSION = subprocess.check_output(
+                ['mathscript', '--version'],
+                creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0)
+            ).decode('utf-8').strip().removeprefix('MathScript ')
         except subprocess.CalledProcessError:
             INSTALLED_VERSION = None
     else:
